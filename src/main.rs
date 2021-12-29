@@ -1,31 +1,10 @@
 use actix_web::{web, App, HttpResponse, HttpServer};
 
+mod decks;
+mod users;
+
 fn index() -> HttpResponse {
     HttpResponse::Ok().body("Home Page")
-}
-
-fn deck_list() -> HttpResponse {
-    HttpResponse::Ok().body("Deck List")
-}
-
-fn create_deck() -> HttpResponse {
-    HttpResponse::Ok().body("create_deck")
-}
-
-fn show_deck() -> HttpResponse {
-    HttpResponse::Ok().body("Show Deck")
-}
-
-fn edit_deck() -> HttpResponse {
-    HttpResponse::Ok().body("Edit Deck")
-}
-
-fn login_page() -> HttpResponse {
-    HttpResponse::Ok().body("Login Page")
-}
-
-fn login() -> HttpResponse {
-    HttpResponse::Ok().body("login")
 }
 
 #[actix_web::main]
@@ -35,15 +14,15 @@ async fn main() -> std::io::Result<()> {
             .route("/", web::get().to(index))
             .service(
                 web::scope("/decks")
-                    .route("/", web::get().to(deck_list))
-                    .route("/", web::post().to(create_deck))
-                    .route("/{id}/", web::get().to(show_deck))
-                    .route("/{id}/", web::patch().to(edit_deck))
+                    .route("/", web::get().to(decks::deck_list))
+                    .route("/", web::post().to(decks::create_deck))
+                    .route("/{id}/", web::get().to(decks::show_deck))
+                    .route("/{id}/", web::patch().to(decks::edit_deck))
             )
             .service(
                 web::scope("/user")
-                    .route("/", web::get().to(login_page))
-                    .route("/", web::post().to(login))
+                    .route("/", web::get().to(users::login_page))
+                    .route("/", web::post().to(users::login))
             )
     })
     .bind("127.0.0.1:8080")?

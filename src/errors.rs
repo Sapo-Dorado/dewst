@@ -3,6 +3,7 @@ use deadpool_postgres::PoolError;
 use derive_more::{Display, From};
 use tokio_pg_mapper::Error as PGMError;
 use tokio_postgres::error::Error as PGError;
+use argon2::Error as ARError;
 
 #[derive(Display, From, Debug)]
 pub enum DbError {
@@ -10,6 +11,7 @@ pub enum DbError {
   PGError(PGError),
   PGMError(PGMError),
   PoolError(PoolError),
+  ARError(ARError),
 }
 impl ResponseError for DbError {
   fn error_response(&self) -> HttpResponse {

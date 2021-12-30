@@ -2,6 +2,7 @@ use actix_web::{web, App, HttpResponse, HttpServer};
 use dotenv::dotenv;
 use tokio_postgres::NoTls;
 
+extern crate argon2;
 mod config;
 mod decks;
 mod users;

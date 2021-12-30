@@ -11,6 +11,8 @@ config = "0.10.1"
 deadpool-postgres = "0.5.0"
 derive_more = "0.99.2"
 dotenv = "0.15.0"
+rust-argon2 = "0.8"
+rand = "0.8"
 serde = { version = "1.0", features = ["derive"] }
 tokio-pg-mapper = "0.1"
 tokio-pg-mapper-derive = "0.1"

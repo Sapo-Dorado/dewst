@@ -8,6 +8,7 @@ use argon2::Error as ARError;
 #[derive(Display, From, Debug)]
 pub enum DbError {
   NotFound,
+  PWError,
   PGError(PGError),
   PGMError(PGMError),
   PoolError(PoolError),
@@ -20,6 +21,7 @@ impl ResponseError for DbError {
           DbError::PoolError(ref err) => {
               HttpResponse::InternalServerError().body(err.to_string())
           }
+          DbError::PWError => HttpResponse::Unauthorized().body("Invalid Password"),
           _ => HttpResponse::InternalServerError().body(&self.to_string()),
       }
   }

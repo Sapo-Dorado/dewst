@@ -3,22 +3,27 @@ use crate::{db, errors::DbError};
 use deadpool_postgres::{Client, Pool};
 use serde::Deserialize;
 
-pub fn login_page() -> HttpResponse {
-    HttpResponse::Ok().body("Login Page")
-}
-
-pub fn login() -> HttpResponse {
-    HttpResponse::Ok().body("Login")
-}
-
 #[derive(Deserialize)]
-pub struct CreateParams {
+pub struct UserParams {
     username: String,
     password: String,
 }
 
+pub fn login_page() -> HttpResponse {
+    HttpResponse::Ok().body("Login Page")
+}
+
+pub async fn login(
+    user: web::Query<UserParams>,
+    db_pool: web::Data<Pool>
+) -> Result<HttpResponse, Error> {
+    let client: Client = db_pool.get().await.map_err(DbError::PoolError)?;
+    let user_info = db::get_user(&client, &user.username, &user.password).await?;
+    Ok(HttpResponse::Ok().json(user_info))
+}
+
 pub async fn create(
-    user: web::Query<CreateParams>,
+    user: web::Query<UserParams>,
     db_pool: web::Data<Pool>
 ) -> Result<HttpResponse, Error> {
 

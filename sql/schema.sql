@@ -5,6 +5,6 @@ CREATE TABLE accounts.users (
   id BIGSERIAL PRIMARY KEY,
   username VARCHAR UNIQUE NOT NULL,
   password_hash VARCHAR NOT NULL,
-  token VARCHAR(36) NOT NULL,
+  token_hash VARCHAR NOT NULL,
   UNIQUE (username)
 );

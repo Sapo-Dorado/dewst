@@ -1,2 +1,2 @@
 SELECT * FROM accounts.users
-WHERE username = $1
+WHERE username = $1;

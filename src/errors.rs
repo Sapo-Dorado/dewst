@@ -5,10 +5,16 @@ use tokio_pg_mapper::Error as PGMError;
 use tokio_postgres::error::Error as PGError;
 use argon2::Error as ARError;
 
+#[derive(Display, Debug)]
+pub enum AuthError {
+  PWError,
+  TokenError,
+}
+
 #[derive(Display, From, Debug)]
 pub enum DbError {
   NotFound,
-  PWError,
+  AuthError(AuthError),
   PGError(PGError),
   PGMError(PGMError),
   PoolError(PoolError),
@@ -21,7 +27,8 @@ impl ResponseError for DbError {
           DbError::PoolError(ref err) => {
               HttpResponse::InternalServerError().body(err.to_string())
           }
-          DbError::PWError => HttpResponse::Unauthorized().body("Invalid Password"),
+          DbError::AuthError(AuthError::PWError) => HttpResponse::Unauthorized().body(format!("Invalid password")),
+          DbError::AuthError(AuthError::TokenError) => HttpResponse::Unauthorized().body(format!("Invalid token")),
           _ => HttpResponse::InternalServerError().body(&self.to_string()),
       }
   }

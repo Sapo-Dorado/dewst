@@ -27,7 +27,7 @@ async fn main() -> std::io::Result<()> {
             .service(
                 web::scope("/decks")
                     .route("/", web::get().to(decks::deck_list))
-                    .route("/", web::post().to(decks::create_deck))
+                    .route("/create/", web::post().to(decks::create_deck))
                     .route("/{id}/", web::get().to(decks::show_deck))
                     .route("/{id}/", web::patch().to(decks::edit_deck))
             )

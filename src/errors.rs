@@ -27,8 +27,8 @@ impl ResponseError for DbError {
           DbError::PoolError(ref err) => {
               HttpResponse::InternalServerError().body(err.to_string())
           }
-          DbError::AuthError(AuthError::PWError) => HttpResponse::Unauthorized().body(format!("Invalid password")),
-          DbError::AuthError(AuthError::TokenError) => HttpResponse::Unauthorized().body(format!("Invalid token")),
+          DbError::AuthError(AuthError::PWError) => HttpResponse::Unauthorized().body("Invalid password"),
+          DbError::AuthError(AuthError::TokenError) => HttpResponse::Unauthorized().body("Invalid token"),
           _ => HttpResponse::InternalServerError().body(&self.to_string()),
       }
   }

@@ -26,10 +26,7 @@ pub async fn create(
     user: web::Query<UserParams>,
     db_pool: web::Data<Pool>
 ) -> Result<HttpResponse, Error> {
-
     let client: Client = db_pool.get().await.map_err(DbError::PoolError)?;
-
     let new_user = db::add_user(&client, &user.username, &user.password).await?;
-
     Ok(HttpResponse::Ok().json(new_user))
 }

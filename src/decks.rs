@@ -3,10 +3,18 @@ use crate::{db, errors::DbError};
 use deadpool_postgres::{Client, Pool};
 use serde::Deserialize;
 
+//#[derive(Deserialize)]
+//pub struct CardInfo {
+//    pub front: String,
+//    pub back: String,
+//}
+
 #[derive(Deserialize)]
 pub struct CreateDeckParams {
-    author: Option<String>,
-    token: Option<String>,
+    pub author: Option<String>,
+    pub token: Option<String>,
+    pub title: String,
+//    pub cards: Vec<String>,
 }
 pub fn deck_list() -> HttpResponse {
     HttpResponse::Ok().body("Deck List")
@@ -17,7 +25,7 @@ pub async fn create_deck(
     db_pool: web::Data<Pool>
 ) -> Result<HttpResponse, DbError> {
     let client: Client = db_pool.get().await.map_err(DbError::PoolError)?;
-    let deck_info = db::add_deck(&client, &deck.author, &deck.token).await?;
+    let deck_info = db::add_deck(&client, &deck).await?;
     Ok(HttpResponse::Ok().json(deck_info))
 }
 

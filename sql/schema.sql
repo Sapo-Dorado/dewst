@@ -16,5 +16,13 @@ CREATE TABLE studying.decks (
   id BIGSERIAL PRIMARY KEY,
   uuid VARCHAR(36) UNIQUE NOT NULL,
   author VARCHAR,
+  title VARCHAR NOT NULL,
   UNIQUE (uuid)
-)
+);
+
+CREATE TABLE studying.cards (
+  id BIGSERIAL PRIMARY KEY,
+  deck_uuid VARCHAR(36) REFERENCES studying.decks(uuid),
+  front VARCHAR,
+  back VARCHAR
+);

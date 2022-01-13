@@ -20,10 +20,12 @@ pub mod models {
   pub struct Deck {
       pub uuid: String,
       pub author: Option<String>,
+      pub title: String,
   }
 }
 
 use crate::errors::{DbError,AuthError};
+use crate::decks;
 use models::{User, UserReturn, Deck};
 use deadpool_postgres::Client;
 use tokio_pg_mapper::FromTokioPostgresRow;
@@ -122,10 +124,10 @@ pub async fn auth_user(client: &Client, username: &String, token: &String) -> Re
   }
 }
 
-pub async fn add_deck(client: &Client, optional_author: &Option<String>, optional_token: &Option<String>) -> Result<Deck, DbError> {
+pub async fn add_deck(client: &Client, deck_info: &decks::CreateDeckParams) -> Result<Deck, DbError> {
   let mut author = None;
-  if let Some(username) = optional_author {
-    if let Some(token) = optional_token {
+  if let Some(username) = &deck_info.author {
+    if let Some(token) = &deck_info.token {
       auth_user(client, &username, &token).await?;
       author = Some(username);
     } else {
@@ -142,6 +144,7 @@ pub async fn add_deck(client: &Client, optional_author: &Option<String>, optiona
       &[
         &Uuid::new_v4().to_string(),
         &author,
+        &deck_info.title,
       ]
     )
     .await?

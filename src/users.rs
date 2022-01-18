@@ -23,7 +23,7 @@ pub async fn login(
 }
 
 pub async fn create(
-    user: web::Query<UserParams>,
+    user: web::Json<UserParams>,
     db_pool: web::Data<Pool>
 ) -> Result<HttpResponse, Error> {
     let client: Client = db_pool.get().await.map_err(DbError::PoolError)?;

@@ -1,5 +1,4 @@
 pub mod models {
-  use crate::decks::Card;
   use serde::{Deserialize, Serialize};
   use tokio_pg_mapper_derive::PostgresMapper;
 
@@ -16,19 +15,26 @@ pub mod models {
     pub username: String,
     pub token: String,
   }
+  #[derive(Serialize, PostgresMapper)]
+  #[pg_mapper(table="cards")]
+  pub struct CardReturn {
+    pub id: i64,
+    pub front: String,
+    pub back: String,
+  }
   #[derive(Serialize)]
-    pub struct Deck {
+  pub struct DeckReturn {
     pub uuid: String,
     pub author: Option<String>,
     pub title: String,
-    pub cards: Vec<Card>,
+    pub cards: Vec<CardReturn>,
   }
 }
 
 use crate::errors::{DbError,AuthError};
 use crate::decks;
 use crate::decks::Card;
-use models::{User, UserReturn, Deck};
+use models::{User, UserReturn, DeckReturn, CardReturn};
 use deadpool_postgres::Client;
 use tokio_pg_mapper::FromTokioPostgresRow;
 use uuid::Uuid;
@@ -126,7 +132,7 @@ pub async fn auth_user(client: &Client, username: &String, token: &String) -> Re
   }
 }
 
-pub async fn add_deck(client: &Client, deck_info: &decks::CreateDeckParams) -> Result<Deck, DbError> {
+pub async fn add_deck(client: &Client, deck_info: &decks::CreateDeckParams) -> Result<DeckReturn, DbError> {
   let mut author = None;
   if let Some(username) = &deck_info.author {
     if let Some(token) = &deck_info.token {
@@ -152,20 +158,24 @@ pub async fn add_deck(client: &Client, deck_info: &decks::CreateDeckParams) -> R
       ]
     )
     .await?;
-  add_cards(client, &uuid, &deck_info.cards).await?;
-  Ok(Deck { uuid, author: deck_info.author.clone(), title: deck_info.title.clone(), cards: deck_info.cards.clone()})
+  let cards = add_cards(client, &uuid, &deck_info.cards).await?;
+  Ok(DeckReturn { uuid, author: deck_info.author.clone(), title: deck_info.title.clone(), cards})
 }
 
-async fn add_cards(client: &Client, deck_uuid: &String, cards: &Vec<Card>) -> Result<(), DbError>{
+async fn add_cards(client: &Client, deck_uuid: &String, cards: &Vec<Card>) -> Result<Vec<CardReturn>, DbError>{
   let _stmt = insert_card_string(deck_uuid, &cards);
+  let _stmt = _stmt.replace("$table_fields", &CardReturn::sql_table_fields());
   let stmt = client.prepare(_stmt.as_str()).await.unwrap();
-  client
+  let cards = client
     .query(
       &stmt,
       &[]
     )
-    .await?;
-  Ok(())
+    .await?
+    .iter()
+    .map(|row| CardReturn::from_row_ref(row).unwrap())
+    .collect::<Vec<CardReturn>>();
+  Ok(cards)
 }
 
 fn insert_card_string(deck_uuid: &String, cards: &Vec<Card>) -> String {
@@ -178,5 +188,6 @@ fn insert_card_string(deck_uuid: &String, cards: &Vec<Card>) -> String {
       result.push_str(",\n");
     }
   }
+  result.push_str("RETURNING\n$table_fields");
   result
 }

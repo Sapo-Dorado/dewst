@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 actix-web = "3"
+maud = "*"
 config = "0.10.1"
 deadpool-postgres = "0.5.0"
 derive_more = "0.99.2"
